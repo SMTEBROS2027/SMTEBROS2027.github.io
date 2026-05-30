@@ -1,392 +1,1407 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>คำใบ้พี่รหัส SMTE</title>
-    <style>
-        /* CSS ตกแต่งเว็บไซต์ */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #000000, #0a192f, #3b0764);
-            color: #ffffff;
-            min-height: 100vh;
-        }
-        header {
-            text-align: center;
-            padding: 40px 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-        h1 { margin: 0; font-size: 2.5em; color: #00d2ff; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; text-align: center; }
-        
-        /* ปุ่มระดับชั้น */
-        .class-btn {
-            background: #4a00e0;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 5px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1.1em;
-            transition: 0.3s;
-        }
-        .class-btn:hover { background: #8e2de2; transform: scale(1.05); }
-        
-        /* รายชื่อนักเรียน */
-        #student-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .student-card {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid #00d2ff;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 120px;
-            transition: 0.3s;
-        }
-        .student-card:hover { background: rgba(0, 210, 255, 0.2); }
-        
-        /* ส่วนพี่รหัส */
-        .seniors-section { margin-top: 50px; border-top: 2px dashed #8e2de2; padding-top: 30px; }
-        #senior-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-        .senior-card {
-            background: rgba(142, 45, 226, 0.2);
-            border: 1px solid #8e2de2;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100px;
-            transition: 0.3s;
-        }
-        .senior-card:hover { background: rgba(142, 45, 226, 0.5); }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คำใบ้พี่รหัส SMTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-        /* หน้าต่าง Popup (Modal) */
-        .modal {
-            display: none; position: fixed; z-index: 1; left: 0; top: 0;
-            width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
-        }
-        .modal-content {
-            background: linear-gradient(135deg, #1f1c2c, #928dab);
-            margin: 15% auto; padding: 20px; border: 1px solid #888;
-            width: 80%; max-width: 400px; border-radius: 10px; text-align: center;
-        }
-        .close { color: #fff; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .close:hover { color: #ff0000; }
-        .senior-img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; }
-    </style>
+<style>
+  /* ===== CSS Variables & Reset ===== */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  :root {
+    --bg: #1b1b1b;
+    --bg-card: #292929;
+    --text: #808080;
+    --text-light: #aaaaaa;
+    --text-white: #ffffff;
+    --border: #808080;
+    --accent: #ffa31a;
+    --accent-dim: rgba(255, 163, 26, 0.15);
+    --font-main: 'Sarabun', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --transition: 0.2s ease;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-main);
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== Noise texture overlay ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ===== Layout ===== */
+  .app-wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 16px 60px;
+  }
+
+  /* ===== Header ===== */
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 0 24px;
+    position: relative;
+    gap: 10px;
+  }
+
+  .hamburger-btn {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px;
+    transition: border-color var(--transition);
+    z-index: 10;
+  }
+
+  .hamburger-btn:hover { border-color: var(--accent); }
+  .hamburger-btn:hover .ham-line { background: var(--accent); }
+
+  .ham-line {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: background var(--transition);
+  }
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header-title h1 {
+    font-family: var(--font-main);
+    font-size: clamp(22px, 5vw, 30px);
+    font-weight: 700;
+    color: var(--text-white);
+    letter-spacing: -0.5px;
+  }
+
+  .smte-badge {
+    font-family: var(--font-mono);
+    font-size: clamp(12px, 3vw, 16px);
+    font-weight: 700;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    display: inline-block;
+  }
+
+  /* ===== Search bar ===== */
+  .search-section {
+    margin-bottom: 20px;
+  }
+
+  .search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 13px 52px 13px 18px;
+    color: var(--text-white);
+    font-family: var(--font-main);
+    font-size: 15px;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+
+  .search-input::placeholder { color: #555; }
+  .search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  .search-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition);
+    border-radius: 6px;
+  }
+
+  .search-btn:hover { color: var(--accent); }
+
+  .search-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ===== Grade Selector ===== */
+  .grade-section {
+    margin-bottom: 24px;
+  }
+
+  .grade-label {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 10px;
+    font-family: var(--font-mono);
+  }
+
+  .grade-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .grade-btn {
+    width: 60px;
+    height: 60px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text);
+    font-family: var(--font-main);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    transition: border-color var(--transition), color var(--transition), background var(--transition);
+    line-height: 1.2;
+  }
+
+  .grade-btn .grade-num {
+    font-size: 18px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .grade-btn .grade-text {
+    font-size: 11px;
+    color: #555;
+  }
+
+  .grade-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .grade-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .grade-btn.active .grade-text { color: var(--accent); opacity: 0.7; }
+
+  /* ===== Student List ===== */
+  .student-list-section { animation: fadeSlideUp 0.3s ease; }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-heading {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 12px;
+    padding-left: 2px;
+  }
+
+  .student-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    user-select: none;
+  }
+
+  .student-card:hover {
+    border-color: var(--accent);
+    background: #2e2e2e;
+    transform: translateX(3px);
+  }
+
+  .student-card:active { transform: translateX(1px) scale(0.99); }
+
+  .student-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .student-number {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: #444;
+    min-width: 28px;
+    text-align: right;
+  }
+
+  .student-id-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: rgba(128,128,128,0.1);
+    border: 1px solid #3a3a3a;
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: #555;
+    white-space: nowrap;
+  }
+
+  .student-name {
+    font-size: 16px;
+    color: var(--text-light);
+    font-weight: 500;
+  }
+
+  .student-arrow {
+    color: #444;
+    font-size: 18px;
+    transition: color var(--transition), transform var(--transition);
+    flex-shrink: 0;
+  }
+
+  .student-card:hover .student-arrow {
+    color: var(--accent);
+    transform: translateX(3px);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #444;
+    font-size: 14px;
+  }
+
+  .empty-state .empty-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+  }
+
+  /* ===== Modal ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px 24px;
+    max-width: 440px;
+    width: 100%;
+    position: relative;
+    animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 18px;
+    transition: border-color var(--transition), color var(--transition);
+    line-height: 1;
+  }
+
+  .modal-close:hover { border-color: var(--accent); color: var(--accent); }
+
+  .modal-student-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 4px;
+    padding-right: 40px;
+  }
+
+  .modal-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #444;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  .modal-hint-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .modal-hint-content {
+    background: rgba(255,163,26,0.05);
+    border: 1px solid rgba(255,163,26,0.2);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    color: var(--text-light);
+    font-size: 15px;
+    line-height: 1.7;
+    word-break: break-word;
+  }
+
+  .modal-hint-content a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .modal-hint-content a:hover { opacity: 0.8; }
+
+  /* ===== Drawer Menu ===== */
+  .drawer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 200;
+    backdrop-filter: blur(2px);
+  }
+
+  .drawer-overlay.open { display: block; animation: fadeIn 0.2s ease; }
+
+  .drawer {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 260px;
+    background: #212121;
+    border-right: 1px solid var(--border);
+    z-index: 201;
+    padding: 0;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .drawer.open { transform: translateX(0); }
+
+  .drawer-header {
+    padding: 28px 20px 20px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .drawer-logo-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-white);
+  }
+
+  .drawer-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .drawer-nav {
+    padding: 12px 10px;
+    list-style: none;
+  }
+
+  .drawer-nav li { margin-bottom: 2px; }
+
+  .drawer-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: var(--font-main);
+    font-size: 15px;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+    text-align: left;
+  }
+
+  .drawer-nav-btn:hover { background: var(--bg-card); color: var(--text-white); }
+
+  .drawer-nav-btn.active {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid rgba(255,163,26,0.25);
+  }
+
+  .drawer-nav-icon {
+    width: 18px;
+    height: 18px;
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+
+  .drawer-nav-btn.active .drawer-nav-icon { opacity: 1; }
+
+  /* ===== Senior Profiles Page ===== */
+  .senior-page { animation: fadeSlideUp 0.3s ease; }
+
+  .page-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .page-subtitle {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 24px;
+  }
+
+  .seniors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .senior-avatar-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 14px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: border-color var(--transition), transform var(--transition), background var(--transition);
+    text-align: center;
+  }
+
+  .senior-avatar-card:hover {
+    border-color: var(--accent);
+    background: #2e2e2e;
+    transform: translateY(-3px);
+  }
+
+  .avatar-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    overflow: hidden;
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color var(--transition);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--font-mono);
+  }
+
+  .avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .senior-avatar-card:hover .avatar-circle { border-color: var(--accent); }
+
+  .senior-card-name {
+    font-size: 14px;
+    color: var(--text-light);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .senior-card-grade {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: #555;
+  }
+
+  /* ===== Senior Detail Modal ===== */
+  .senior-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-right: 40px;
+  }
+
+  .senior-modal-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    overflow: hidden;
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--font-mono);
+  }
+
+  .senior-modal-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .senior-modal-info h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 3px;
+  }
+
+  .senior-modal-grade {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+  }
+
+  .senior-section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 8px;
+    margin-top: 16px;
+  }
+
+  .senior-motto {
+    background: rgba(255,163,26,0.06);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    color: var(--text-light);
+    font-size: 14px;
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  .contact-list {
+    list-style: none;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid #333;
+    font-size: 14px;
+  }
+
+  .contact-item:last-child { border-bottom: none; }
+
+  .contact-icon {
+    width: 28px;
+    height: 28px;
+    background: rgba(128,128,128,0.1);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+
+  .contact-label {
+    color: #555;
+    font-size: 12px;
+    min-width: 60px;
+  }
+
+  .contact-value {
+    color: var(--text-light);
+    word-break: break-word;
+  }
+
+  .contact-value a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .contact-value a:hover { text-decoration: underline; }
+
+  /* ===== Utility ===== */
+  .hidden { display: none !important; }
+
+  /* ===== Scrollbar ===== */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border); }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 400px) {
+    .grade-btn { width: 54px; height: 54px; }
+    .seniors-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  }
+</style>
 </head>
 <body>
 
-    <header>
-        <h1>คำใบ้พี่รหัส SMTE นะจ๊ะ</h1>
-    </header>
+<!-- ===== Drawer Overlay ===== -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 
-    <div class="container">
-        <div id="class-buttons">
-            <button class="class-btn" onclick="showStudents('ม.1')">ม.1</button>
-            <button class="class-btn" onclick="showStudents('ม.2')">ม.2</button>
-            <button class="class-btn" onclick="showStudents('ม.3')">ม.3</button>
-            <button class="class-btn" onclick="showStudents('ม.4')">ม.4</button>
-            <button class="class-btn" onclick="showStudents('ม.5')">ม.5</button>
-        </div>
+<!-- ===== Drawer Menu ===== -->
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <span class="drawer-logo-text">คำใบ้พี่รหัส</span>
+    <span class="drawer-badge">SMTE</span>
+  </div>
+  <ul class="drawer-nav">
+    <li>
+      <button class="drawer-nav-btn active" id="menuHome" onclick="navigateTo('home')">
+        <!-- ไอคอนบ้าน (SVG inline) -->
+        <svg class="drawer-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        หน้าหลัก
+      </button>
+    </li>
+    <li>
+      <button class="drawer-nav-btn" id="menuSenior" onclick="navigateTo('senior')">
+        <!-- ไอคอนกลุ่มคน (SVG inline) -->
+        <svg class="drawer-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="7" r="4"/><path d="M3 20v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 20v-2a4 4 0 00-3-3.87"/>
+        </svg>
+        ข้อมูลพี่รหัส
+      </button>
+    </li>
+  </ul>
+</div>
 
-        <h3 id="current-class" style="color: #00d2ff; margin-top: 20px;"></h3>
-        <div id="student-list"></div>
+<!-- ===== Main App Wrapper ===== -->
+<div class="app-wrapper">
 
-        <div class="seniors-section">
-            <h2>ทำเนียบพี่รหัส SMTE</h2>
-            <div id="senior-list"></div>
-        </div>
+  <!-- ===== Site Header ===== -->
+  <header class="site-header">
+    <button class="hamburger-btn" onclick="openDrawer()" aria-label="เปิดเมนู">
+      <span class="ham-line"></span>
+      <span class="ham-line"></span>
+      <span class="ham-line"></span>
+    </button>
+    <div class="header-title">
+      <h1>คำใบ้พี่รหัส</h1>
+      <span class="smte-badge">SMTE</span>
     </div>
+  </header>
 
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <div id="modal-body"></div>
-        </div>
+  <!-- ===== หน้าหลัก (Home Page) ===== -->
+  <main id="homePage">
+
+    <!-- ส่วนค้นหา -->
+    <section class="search-section">
+      <div class="search-wrapper">
+        <input
+          type="text"
+          class="search-input"
+          id="searchInput"
+          placeholder="ค้นหาชื่อ, เลขที่, หรือเลขประจำตัวนักเรียน..."
+          oninput="handleSearch(this.value)"
+          autocomplete="off"
+        >
+        <button class="search-btn" onclick="handleSearch(document.getElementById('searchInput').value)" aria-label="ค้นหา">
+          <!-- ไอคอนแว่นขยาย -->
+          <svg viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ส่วนเลือกชั้นปี -->
+    <section class="grade-section">
+      <div class="grade-label">เลือกชั้นปี</div>
+      <div class="grade-buttons" id="gradeButtons">
+        <!-- สร้างปุ่มชั้นปีด้วย JavaScript -->
+      </div>
+    </section>
+
+    <!-- ส่วนแสดงรายชื่อนักเรียน -->
+    <section id="studentListSection">
+      <!-- แสดงผลด้วย JavaScript -->
+    </section>
+
+  </main>
+
+  <!-- ===== หน้าพี่รหัส (Senior Page) ===== -->
+  <section id="seniorPage" class="senior-page hidden">
+    <div class="page-title">SMTE SENIORS</div>
+    <div class="page-subtitle">ข้อมูลพี่รหัส</div>
+    <div class="seniors-grid" id="seniorsGrid">
+      <!-- สร้างการ์ดพี่รหัสด้วย JavaScript -->
     </div>
+  </section>
 
-    <script>
-        // =========================================================
-        // พื้นที่สำหรับแก้ไขข้อมูล (แก้ไขง่ายๆ ตรงนี้ได้เลยครับ!)
-        // =========================================================
+</div><!-- end .app-wrapper -->
 
-        // 1. ข้อมูลนักเรียนและคำใบ้ (สร้างเผื่อไว้ให้ดูเป็นตัวอย่าง สามารถก็อปวางให้ครบ 30 คนได้เลย)
-        const studentsData = {
-            "ม.1": [
-                { id: 1, name: "เลขที่ 1", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 2, name: "เลขที่ 2", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 3, name: "เลขที่ 3", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 4, name: "เลขที่ 4", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 5, name: "เลขที่ 5", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 6, name: "เลขที่ 6", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 7, name: "เลขที่ 7", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 8, name: "เลขที่ 8", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 9, name: "เลขที่ 9", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 10, name: "เลขที่ 10", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 11, name: "เลขที่ 11", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 12, name: "เลขที่ 12", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 13, name: "เลขที่ 13", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 14, name: "เลขที่ 14", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 15, name: "เลขที่ 15", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 16, name: "เลขที่ 16", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 17, name: "เลขที่ 17", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 18, name: "เลขที่ 18", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 19, name: "เลขที่ 19", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 20, name: "เลขที่ 20", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 21, name: "เลขที่ 21", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 22, name: "เลขที่ 22", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 23, name: "เลขที่ 23", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 24, name: "เลขที่ 24", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 25, name: "เลขที่ 25", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 26, name: "เลขที่ 26", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 27, name: "เลขที่ 27", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 28, name: "เลขที่ 28", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 29, name: "เลขที่ 29", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 30, name: "เลขที่ 30", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-            ],
-            "ม.2": [
-                { id: 1, name: "เลขที่ 1", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 2, name: "เลขที่ 2", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 3, name: "เลขที่ 3", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 4, name: "เลขที่ 4", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 5, name: "เลขที่ 5", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 6, name: "เลขที่ 6", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 7, name: "เลขที่ 7", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 8, name: "เลขที่ 8", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 9, name: "เลขที่ 9", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 10, name: "เลขที่ 10", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 11, name: "เลขที่ 11", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 12, name: "เลขที่ 12", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 13, name: "เลขที่ 13", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 14, name: "เลขที่ 14", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 15, name: "เลขที่ 15", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 16, name: "เลขที่ 16", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 17, name: "เลขที่ 17", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 18, name: "เลขที่ 18", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 19, name: "เลขที่ 19", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 20, name: "เลขที่ 20", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 21, name: "เลขที่ 21", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 22, name: "เลขที่ 22", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 23, name: "เลขที่ 23", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 24, name: "เลขที่ 24", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 25, name: "เลขที่ 25", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 26, name: "เลขที่ 26", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 27, name: "เลขที่ 27", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 28, name: "เลขที่ 28", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 29, name: "เลขที่ 29", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 30, name: "เลขที่ 30", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-            ],
-            "ม.3": [
-                { id: 1, name: "เลขที่ 1", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 2, name: "เลขที่ 2", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 3, name: "เลขที่ 3", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 4, name: "เลขที่ 4", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 5, name: "เลขที่ 5", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 6, name: "เลขที่ 6", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 7, name: "เลขที่ 7", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 8, name: "เลขที่ 8", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 9, name: "เลขที่ 9", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 10, name: "เลขที่ 10", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 11, name: "เลขที่ 11", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 12, name: "เลขที่ 12", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 13, name: "เลขที่ 13", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 14, name: "เลขที่ 14", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 15, name: "เลขที่ 15", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 16, name: "เลขที่ 16", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 17, name: "เลขที่ 17", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 18, name: "เลขที่ 18", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 19, name: "เลขที่ 19", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 20, name: "เลขที่ 20", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 21, name: "เลขที่ 21", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 22, name: "เลขที่ 22", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 23, name: "เลขที่ 23", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 24, name: "เลขที่ 24", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 25, name: "เลขที่ 25", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 26, name: "เลขที่ 26", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 27, name: "เลขที่ 27", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 28, name: "เลขที่ 28", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 29, name: "เลขที่ 29", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 30, name: "เลขที่ 30", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-            ],
-            "ม.4": [
-                { id: 1, name: "เลขที่ 1", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 2, name: "เลขที่ 2", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 3, name: "เลขที่ 3", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 4, name: "เลขที่ 4", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 5, name: "เลขที่ 5", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 6, name: "เลขที่ 6", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 7, name: "เลขที่ 7", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 8, name: "เลขที่ 8", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 9, name: "เลขที่ 9", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 10, name: "เลขที่ 10", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 11, name: "เลขที่ 11", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 12, name: "เลขที่ 12", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 13, name: "เลขที่ 13", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 14, name: "เลขที่ 14", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 15, name: "เลขที่ 15", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 16, name: "เลขที่ 16", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 17, name: "เลขที่ 17", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 18, name: "เลขที่ 18", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 19, name: "เลขที่ 19", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 20, name: "เลขที่ 20", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 21, name: "เลขที่ 21", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 22, name: "เลขที่ 22", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 23, name: "เลขที่ 23", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 24, name: "เลขที่ 24", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 25, name: "เลขที่ 25", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 26, name: "เลขที่ 26", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 27, name: "เลขที่ 27", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 28, name: "เลขที่ 28", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 29, name: "เลขที่ 29", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 30, name: "เลขที่ 30", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-            ],
-            "ม.5": [
-                { id: 1, name: "เลขที่ 1", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 2, name: "เลขที่ 2", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 3, name: "เลขที่ 3", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 4, name: "เลขที่ 4", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 5, name: "เลขที่ 5", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 6, name: "เลขที่ 6", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 7, name: "เลขที่ 7", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 8, name: "เลขที่ 8", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 9, name: "เลขที่ 9", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 10, name: "เลขที่ 10", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 11, name: "เลขที่ 11", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 12, name: "เลขที่ 12", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 13, name: "เลขที่ 13", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 14, name: "เลขที่ 14", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 15, name: "เลขที่ 15", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 16, name: "เลขที่ 16", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 17, name: "เลขที่ 17", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 18, name: "เลขที่ 18", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 19, name: "เลขที่ 19", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 20, name: "เลขที่ 20", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 21, name: "เลขที่ 21", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 22, name: "เลขที่ 22", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 23, name: "เลขที่ 23", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 24, name: "เลขที่ 24", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 25, name: "เลขที่ 25", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 26, name: "เลขที่ 26", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 27, name: "เลขที่ 27", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 28, name: "เลขที่ 28", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-                { id: 29, name: "เลขที่ 29", hint: "พี่ชอบกินชานมไข่มุกร้านหน้าโรงเรียน" },
-                { id: 30, name: "เลขที่ 30", hint: "พี่เป็นคนใส่แว่น นั่งอยู่หลังห้อง" },
-            ],  
-        };
+<!-- ===== Modal: คำใบ้นักเรียน ===== -->
+<div class="modal-overlay" id="hintModal" onclick="closeHintModal(event)">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalStudentName">
+    <button class="modal-close" onclick="closeHintModal(null, true)" aria-label="ปิด">×</button>
+    <div class="modal-student-name" id="modalStudentName"></div>
+    <div class="modal-meta" id="modalStudentMeta"></div>
+    <div class="modal-hint-label">— คำใบ้ —</div>
+    <div class="modal-hint-content" id="modalHintContent"></div>
+  </div>
+</div>
 
-        // 2. ข้อมูลพี่รหัส 30 คน (แก้ไขรูป ชื่อ และช่องทางติดต่อ)
-        const seniorsData = [
-            { id: 1, name: "พี่เปา", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 2, name: "พี่แบม", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 3, name: "พี่ธันวา หญิง", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 4, name: "พี่เปา", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 5, name: "พี่มุก", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 6, name: "พี่มีน", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 7, name: "พี่ไนท์", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 8, name: "พี่ใบบุญ", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 9, name: "พี่สิงโต", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 10, name: "พี่นุ่น", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 11, name: "พี่น้ำ", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 12, name: "พี่แป้ง", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 13, name: "พี่สแบง", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 14, name: "พี่ลีโอ", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 15, name: "พี่นิว", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 16, name: "พี่เติ้ล", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 17, name: "พี่เซเว่น", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 18, name: "พี่เต้", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 19, name: "พี่เหนือ", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 20, name: "พี่โวโว่", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 21, name: "พี่ฟาง", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 22, name: "พี่เปรียว", image: "ratha.jpg", contact: "IG: @ventricle_015" },
-            { id: 23, name: "พี่โดนัท", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 24, name: "พี่ใบว่าน", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 25, name: "พี่เหมย", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 26, name: "พี่ธันวา ชาย", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 27, name: "พี่นที", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 28, name: "พี่ภูมิ", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 29, name: "พี่น้ำหวาน", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-            { id: 30, name: "พี่ฟ่าง", image: "https://via.placeholder.com/150", contact: "IG: @a_smte" },
-        ];
+<!-- ===== Modal: ข้อมูลพี่รหัส ===== -->
+<div class="modal-overlay" id="seniorModal" onclick="closeSeniorModal(event)">
+  <div class="modal-box" role="dialog" aria-modal="true">
+    <button class="modal-close" onclick="closeSeniorModal(null, true)" aria-label="ปิด">×</button>
+    <div class="senior-modal-header">
+      <div class="senior-modal-avatar" id="seniorModalAvatar"></div>
+      <div class="senior-modal-info">
+        <h2 id="seniorModalName"></h2>
+        <div class="senior-modal-grade" id="seniorModalGrade"></div>
+      </div>
+    </div>
+    <div class="senior-section-label">คติประจำตัว</div>
+    <div class="senior-motto" id="seniorModalMotto"></div>
+    <div class="senior-section-label">ข้อมูลติดต่อ</div>
+    <ul class="contact-list" id="seniorModalContacts"></ul>
+  </div>
+</div>
 
-        // =========================================================
-        // สิ้นสุดพื้นที่สำหรับแก้ไขข้อมูล (ด้านล่างคือระบบการทำงาน ไม่ต้องแก้ครับ)
-        // =========================================================
 
-        const modal = document.getElementById("myModal");
-        const modalBody = document.getElementById("modal-body");
+<script>
+/* ============================================================
+   ข้อมูลหลัก — แก้ไขส่วนนี้เพื่ออัปเดตรายชื่อนักเรียน
+   ============================================================
+   โครงสร้าง:
+   {
+     grade: ม.X (ตัวเลข 1-5),
+     students: [
+       {
+         number: เลขที่ (ตัวเลข),
+         studentId: 'เลขประจำตัวนักเรียน' (string),
+         name: 'ชื่อ-นามสกุล' (string),
+         hint: 'คำใบ้' (string, ใส่ URL ได้ เช่น https://... จะแสดงเป็นลิงก์คลิกได้)
+       },
+       ...
+     ]
+   }
+   ============================================================ */
+const STUDENTS_DATA = [
 
-        // ฟังก์ชันแสดงรายชื่อน้อง
-        function showStudents(className) {
-            document.getElementById("current-class").innerText = `รายชื่อน้อง ${className}`;
-            const studentList = document.getElementById("student-list");
-            studentList.innerHTML = ""; // เคลียร์ของเก่า
+  /* ==========================================
+     ม.1 — เพิ่ม/แก้ไข รายชื่อ, เลขที่, คำใบ้ ได้ที่นี่
+     ========================================== */
+  {
+    grade: 1,
+    students: [
+      { number: 1,  studentId: '6701001', name: 'ด.ช. อภิชัย สุขสม',       hint: 'คำใบ้ของฉันซ่อนอยู่ที่กระดานดำ ห้อง 101' },
+      { number: 2,  studentId: '6701002', name: 'ด.ช. ณัฐพล มีสุข',         hint: 'https://example.com/hint/m1-02' },
+      { number: 3,  studentId: '6701003', name: 'ด.ญ. ปาลิตา รักดี',        hint: 'มองหาของที่มีสีส้มในห้องดนตรี' },
+      { number: 4,  studentId: '6701004', name: 'ด.ญ. วรัญญา จันทรา',       hint: 'คำใบ้อยู่ใต้โต๊ะกลางห้องสมุด' },
+      { number: 5,  studentId: '6701005', name: 'ด.ช. ภูมิพัฒน์ เกียรติศักดิ์', hint: 'ถามคนที่ชอบสีฟ้า' },
+    ]
+  },
 
-            const students = studentsData[className] || [];
-            
-            if(students.length === 0) {
-                studentList.innerHTML = "<p>ยังไม่มีข้อมูลในชั้นนี้</p>";
-                return;
-            }
+  /* ==========================================
+     ม.2 — เพิ่ม/แก้ไข รายชื่อ, เลขที่, คำใบ้ ได้ที่นี่
+     ========================================== */
+  {
+    grade: 2,
+    students: [
+      { number: 1,  studentId: '6602001', name: 'ด.ช. วุฒิชัย ทองดี',        hint: 'คำใบ้ซ่อนอยู่ในหนังสือนิทาน ชั้น 3 ห้องสมุด' },
+      { number: 2,  studentId: '6602002', name: 'ด.ญ. กัญญาณัฐ ชัยวัฒนา',    hint: 'https://drive.google.com/example-link-m2' },
+      { number: 3,  studentId: '6602003', name: 'ด.ช. รัตนชัย ศรีวิชัย',      hint: 'หมายเลขล็อกเกอร์คือวันเกิดของพี่รหัสคุณ' },
+      { number: 4,  studentId: '6602004', name: 'ด.ญ. สุพรรษา นามสกุล',      hint: 'มองหาป้ายสีส้มหน้าโรงอาหาร' },
+    ]
+  },
 
-            students.forEach(student => {
-                const div = document.createElement("div");
-                div.className = "student-card";
-                div.innerText = student.name;
-                div.onclick = () => showHint(student.name, student.hint);
-                studentList.appendChild(div);
-            });
+  /* ==========================================
+     ม.3 — เพิ่ม/แก้ไข รายชื่อ, เลขที่, คำใบ้ ได้ที่นี่
+     ========================================== */
+  {
+    grade: 3,
+    students: [
+      { number: 1,  studentId: '6503001', name: 'น.ส. ชนัญชิดา ดวงเด่น',     hint: 'คำใบ้อยู่บนกระดาน Padlet นี้: https://padlet.com/example' },
+      { number: 2,  studentId: '6503002', name: 'น.ช. ธีรภัทร แสงทอง',       hint: 'ถามเพื่อนที่ใส่แว่นตาสีดำ แล้วเขาจะบอกคุณ' },
+      { number: 3,  studentId: '6503003', name: 'น.ส. พิมพ์ชนก วรรณสิทธิ์',   hint: 'ค้นหาในหัวข้อที่ 7 ของเอกสารที่ได้รับ' },
+    ]
+  },
+
+  /* ==========================================
+     ม.4 — เพิ่ม/แก้ไข รายชื่อ, เลขที่, คำใบ้ ได้ที่นี่
+     ========================================== */
+  {
+    grade: 4,
+    students: [
+      { number: 1,  studentId: '6404001', name: 'น.ส. อรณิชา พัฒนาชาติ',     hint: 'คำใบ้อยู่ที่ลิงก์นี้ครับ: https://bit.ly/smte-hint-4-1' },
+      { number: 2,  studentId: '6404002', name: 'น.ช. ปรเมศ ชวนะนันทน์',      hint: 'รหัสสี: #ffa31a นำตัวเลขฐาน 16 มาบวกกัน' },
+      { number: 3,  studentId: '6404003', name: 'น.ส. สิรินทรา ยิ่งยง',        hint: 'ดูที่มุมขวาล่างของแผนผังชั้น 2 อาคาร ก.' },
+      { number: 4,  studentId: '6404004', name: 'น.ช. ภัทรพล เนตรทอง',        hint: 'คำใบ้ซ่อนในข้อสอบข้อที่ 13 ของวิชาวิทยาศาสตร์' },
+    ]
+  },
+
+  /* ==========================================
+     ม.5 — เพิ่ม/แก้ไข รายชื่อ, เลขที่, คำใบ้ ได้ที่นี่
+     ========================================== */
+  {
+    grade: 5,
+    students: [
+      { number: 1,  studentId: '6305001', name: 'น.ส. กวินทิพย์ มงคลชัย',    hint: 'สแกน QR Code ที่ประตูห้องวิทย์คอม' },
+      { number: 2,  studentId: '6305002', name: 'น.ช. ชาญณรงค์ สิทธิ์ขุนทด', hint: 'ลิงก์ Google Form สำหรับรับรหัส: https://forms.gle/example' },
+      { number: 3,  studentId: '6305003', name: 'น.ส. ธัญพิชชา ลือชา',        hint: 'มองหาสติกเกอร์รูปดาวสีทอง' },
+    ]
+  }
+
+]; // END STUDENTS_DATA
+
+
+/* ============================================================
+   ข้อมูลพี่รหัส — แก้ไขส่วนนี้เพื่ออัปเดตข้อมูลพี่รหัส
+   ============================================================
+   โครงสร้าง:
+   {
+     id: รหัสเฉพาะ (string),
+     name: 'ชื่อ-นามสกุล' (string),
+     grade: 'ชั้นปี (string, เช่น "ม.6")',
+     avatarUrl: URL รูปโปรไฟล์ (string, ใส่ '' เพื่อใช้ initials แทน),
+     initials: 'อักษรย่อ 2 ตัว' (string, ใช้เมื่อไม่มีรูป),
+     motto: 'คติประจำตัว' (string),
+     contacts: [
+       { icon: 'emoji', label: 'ชื่อช่องทาง', value: 'ข้อมูลติดต่อ หรือ URL' },
+       ...
+     ]
+   }
+   ============================================================ */
+const SENIORS_DATA = [
+
+  /* ==========================================
+     พี่รหัส — เพิ่ม/แก้ไข ข้อมูลพี่รหัส ได้ที่นี่
+     ========================================== */
+  {
+    id: 'senior-01',
+    name: 'พี่เอ็ม ณัฐวุฒิ อัครพงษ์',
+    grade: 'ม.6/1',
+    avatarUrl: '', // ใส่ URL รูปโปรไฟล์ เช่น 'https://example.com/photo.jpg'
+    initials: 'นอ',
+    motto: '"สิ่งที่ยากที่สุดคือการเริ่มต้น แต่สิ่งที่สำคัญที่สุดคือการไม่หยุด"',
+    contacts: [
+      { icon: '📱', label: 'Facebook', value: 'https://facebook.com/example-senior01' },
+      { icon: '📸', label: 'Instagram', value: '@smte_senior01' },
+      { icon: '📞', label: 'โทรศัพท์', value: '08X-XXX-XXXX' },
+    ]
+  },
+  {
+    id: 'senior-02',
+    name: 'พี่พลอย สิรีรัตน์ เชิดชูชัย',
+    grade: 'ม.6/1',
+    avatarUrl: '',
+    initials: 'สช',
+    motto: '"ความพยายามไม่เคยทำให้ใครผิดหวัง"',
+    contacts: [
+      { icon: '📱', label: 'Line', value: '@sr_ploy' },
+      { icon: '📸', label: 'Instagram', value: '@ploy.smte' },
+    ]
+  },
+  {
+    id: 'senior-03',
+    name: 'พี่ปอ ธนวัฒน์ ศิลปชัย',
+    grade: 'ม.6/2',
+    avatarUrl: '',
+    initials: 'ธศ',
+    motto: '"อ่านหนังสือทุกวัน เพราะโลกไม่หยุดหมุน"',
+    contacts: [
+      { icon: '📱', label: 'Facebook', value: 'https://facebook.com/example-senior03' },
+      { icon: '✉️', label: 'Email', value: 'senior03@smte.school' },
+    ]
+  },
+  {
+    id: 'senior-04',
+    name: 'พี่เฟิร์น กุลธิดา ไพรวัลย์',
+    grade: 'ม.6/2',
+    avatarUrl: '',
+    initials: 'กพ',
+    motto: '"ยิ้มไว้ก่อน แล้วทุกอย่างจะดีขึ้นเอง"',
+    contacts: [
+      { icon: '📸', label: 'Instagram', value: '@fern.smte6' },
+      { icon: '📱', label: 'Line', value: 'fern_smte' },
+    ]
+  },
+  {
+    id: 'senior-05',
+    name: 'พี่เจมส์ กิตติพงษ์ รุ่งเรือง',
+    grade: 'ม.6/3',
+    avatarUrl: '',
+    initials: 'กร',
+    motto: '"Science is not just a subject, it\'s a way of thinking."',
+    contacts: [
+      { icon: '📱', label: 'Facebook', value: 'https://facebook.com/example-senior05' },
+      { icon: '📞', label: 'โทรศัพท์', value: '08X-XXX-XXXX' },
+    ]
+  },
+  {
+    id: 'senior-06',
+    name: 'พี่มิ้น พรปวีณ์ วงษ์ทอง',
+    grade: 'ม.6/3',
+    avatarUrl: '',
+    initials: 'พว',
+    motto: '"ทำวันนี้ให้ดีที่สุด พรุ่งนี้จะสบายใจ"',
+    contacts: [
+      { icon: '📸', label: 'Instagram', value: '@min.smte.official' },
+      { icon: '✉️', label: 'Email', value: 'min_smte@example.com' },
+    ]
+  }
+
+]; // END SENIORS_DATA
+
+
+/* ============================================================
+   สถานะแอปพลิเคชัน (Application State)
+   ============================================================ */
+let currentGrade = null;    // ชั้นปีที่เลือกอยู่ตอนนี้
+let currentPage = 'home';   // หน้าที่แสดงอยู่: 'home' | 'senior'
+let searchQuery = '';        // ข้อความที่กำลังค้นหา
+
+
+/* ============================================================
+   ฟังก์ชันเริ่มต้น (Initialization)
+   ============================================================ */
+function init() {
+  renderGradeButtons();
+  renderSeniorsGrid();
+}
+
+
+/* ============================================================
+   ฟังก์ชัน: สร้างปุ่มเลือกชั้นปี
+   ============================================================ */
+function renderGradeButtons() {
+  const container = document.getElementById('gradeButtons');
+  container.innerHTML = '';
+  [1, 2, 3, 4, 5].forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'grade-btn' + (currentGrade === g ? ' active' : '');
+    btn.setAttribute('aria-label', `ชั้น ม.${g}`);
+    btn.innerHTML = `<span class="grade-num">${g}</span><span class="grade-text">ม.${g}</span>`;
+    btn.onclick = () => selectGrade(g);
+    container.appendChild(btn);
+  });
+}
+
+
+/* ============================================================
+   ฟังก์ชัน: เลือกชั้นปี
+   ============================================================ */
+function selectGrade(grade) {
+  // ถ้ากดชั้นเดิมซ้ำ ให้ยกเลิกการเลือก
+  currentGrade = (currentGrade === grade) ? null : grade;
+  searchQuery = '';
+  document.getElementById('searchInput').value = '';
+  renderGradeButtons();
+  renderStudentList();
+}
+
+
+/* ============================================================
+   ฟังก์ชัน: จัดการการค้นหา
+   ============================================================ */
+function handleSearch(value) {
+  searchQuery = value.trim().toLowerCase();
+
+  // ถ้ามีคำค้นหา ให้ยกเลิกการกรองตามชั้นปี
+  if (searchQuery) {
+    currentGrade = null;
+    renderGradeButtons();
+  }
+  renderStudentList();
+}
+
+
+/* ============================================================
+   ฟังก์ชัน: กรองและเรียงลำดับนักเรียน
+   ============================================================ */
+function getFilteredStudents() {
+  let results = [];
+
+  if (searchQuery) {
+    // ค้นหาจากทุกชั้น
+    STUDENTS_DATA.forEach(gradeData => {
+      gradeData.students.forEach(s => {
+        const matchName = s.name.toLowerCase().includes(searchQuery);
+        const matchNumber = String(s.number).includes(searchQuery);
+        const matchId = s.studentId.toLowerCase().includes(searchQuery);
+        if (matchName || matchNumber || matchId) {
+          results.push({ ...s, grade: gradeData.grade });
         }
+      });
+    });
+  } else if (currentGrade !== null) {
+    // แสดงเฉพาะชั้นที่เลือก
+    const gradeData = STUDENTS_DATA.find(d => d.grade === currentGrade);
+    if (gradeData) {
+      results = gradeData.students.map(s => ({ ...s, grade: gradeData.grade }));
+    }
+  }
 
-        // ฟังก์ชันแสดงคำใบ้
-        function showHint(name, hint) {
-            modalBody.innerHTML = `<h3>คำใบ้ของ ${name}</h3><p style="font-size: 1.2em; color: #00d2ff;">"${hint}"</p>`;
-            modal.style.display = "block";
-        }
+  // เรียงตามเลขที่ภายในชั้น
+  return results.sort((a, b) => a.grade - b.grade || a.number - b.number);
+}
 
-        // โหลดข้อมูลพี่รหัส
-        function loadSeniors() {
-            const seniorList = document.getElementById("senior-list");
-            seniorsData.forEach(senior => {
-                const div = document.createElement("div");
-                div.className = "senior-card";
-                div.innerText = senior.name;
-                div.onclick = () => showSeniorInfo(senior);
-                seniorList.appendChild(div);
-            });
-        }
 
-        // ฟังก์ชันแสดงข้อมูลพี่รหัส
-        function showSeniorInfo(senior) {
-            modalBody.innerHTML = `
-                <img src="${senior.image}" class="senior-img" alt="รูปพี่รหัส">
-                <h3>${senior.name}</h3>
-                <p style="color: #00d2ff; font-size: 1.2em;">ช่องทางการติดต่อ:</p>
-                <p>${senior.contact}</p>
-            `;
-            modal.style.display = "block";
-        }
+/* ============================================================
+   ฟังก์ชัน: แสดงรายชื่อนักเรียน
+   ============================================================ */
+function renderStudentList() {
+  const section = document.getElementById('studentListSection');
+  const students = getFilteredStudents();
 
-        // ปิดหน้าต่าง Popup
-        function closeModal() {
-            modal.style.display = "none";
-        }
-        window.onclick = function(event) {
-            if (event.target == modal) { modal.style.display = "none"; }
-        }
+  if (!currentGrade && !searchQuery) {
+    section.innerHTML = '';
+    return;
+  }
 
-        // รันฟังก์ชันโหลดพี่รหัสเมื่อเปิดหน้าเว็บ
-        loadSeniors();
-    </script>
+  let headingText = searchQuery
+    ? `ผลการค้นหา "${document.getElementById('searchInput').value}" (${students.length} รายการ)`
+    : `รายชื่อนักเรียน ม.${currentGrade} (${students.length} คน)`;
 
+  if (students.length === 0) {
+    section.innerHTML = `
+      <div class="section-heading">${headingText}</div>
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div>ไม่พบข้อมูลที่ค้นหา</div>
+      </div>`;
+    return;
+  }
+
+  const listHtml = students.map(s => `
+    <div class="student-card" onclick="openHintModal('${s.studentId}', ${s.grade})" role="button" tabindex="0"
+         onkeydown="if(event.key==='Enter') openHintModal('${s.studentId}', ${s.grade})">
+      <div class="student-info">
+        <span class="student-number">${String(s.number).padStart(2,'0')}</span>
+        <div>
+          <div class="student-name">${escHtml(s.name)}</div>
+          <span class="student-id-badge">${escHtml(s.studentId)}</span>
+        </div>
+      </div>
+      <span class="student-arrow" aria-hidden="true">›</span>
+    </div>
+  `).join('');
+
+  section.innerHTML = `
+    <div class="student-list-section">
+      <div class="section-heading">${headingText}</div>
+      ${listHtml}
+    </div>`;
+}
+
+
+/* ============================================================
+   ฟังก์ชัน: เปิด Modal คำใบ้นักเรียน
+   ============================================================ */
+function openHintModal(studentId, grade) {
+  const gradeData = STUDENTS_DATA.find(d => d.grade === grade);
+  if (!gradeData) return;
+  const student = gradeData.students.find(s => s.studentId === studentId);
+  if (!student) return;
+
+  document.getElementById('modalStudentName').textContent = student.name;
+  document.getElementById('modalStudentMeta').textContent =
+    `ม.${grade} · เลขที่ ${student.number} · รหัส ${student.studentId}`;
+
+  // ตรวจสอบว่าคำใบ้เป็น URL หรือไม่ ถ้าใช่ทำเป็นลิงก์คลิกได้
+  document.getElementById('modalHintContent').innerHTML = formatHint(student.hint);
+
+  document.getElementById('hintModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+
+/* ============================================================
+   ฟังก์ชัน: แปลงคำใบ้ — ถ้าเป็น URL ทำเป็น <a> ที่คลิกได้
+   ============================================================ */
+function formatHint(hint) {
+  if (!hint) return '<em style="color:#555">ยังไม่มีคำใบ้</em>';
+
+  // Regex ตรวจหา URL ใน text
+  const urlPattern = /(https?:\/\/[^\s<>"]+)/gi;
+  return escHtml(hint).replace(urlPattern, url => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+  });
+}
+
+
+/* ============================================================
+   ฟังก์ชัน: ปิด Modal คำใบ้
+   ============================================================ */
+function closeHintModal(event, force = false) {
+  if (force || (event && event.target === document.getElementById('hintModal'))) {
+    document.getElementById('hintModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+
+/* ============================================================
+   ฟังก์ชัน: สร้างกริดพี่รหัส
+   ============================================================ */
+function renderSeniorsGrid() {
+  const grid = document.getElementById('seniorsGrid');
+  grid.innerHTML = SENIORS_DATA.map(s => `
+    <div class="senior-avatar-card" onclick="openSeniorModal('${s.id}')"
+         role="button" tabindex="0"
+         onkeydown="if(event.key==='Enter') openSeniorModal('${s.id}')">
+      <div class="avatar-circle">
+        ${s.avatarUrl
+          ? `<img src="${escHtml(s.avatarUrl)}" alt="รูป${escHtml(s.name)}" loading="lazy">`
+          : escHtml(s.initials)}
+      </div>
+      <div class="senior-card-name">${escHtml(s.name)}</div>
+      <div class="senior-card-grade">${escHtml(s.grade)}</div>
+    </div>
+  `).join('');
+}
+
+
+/* ============================================================
+   ฟังก์ชัน: เปิด Modal ข้อมูลพี่รหัส
+   ============================================================ */
+function openSeniorModal(seniorId) {
+  const senior = SENIORS_DATA.find(s => s.id === seniorId);
+  if (!senior) return;
+
+  // ตั้งค่า Avatar
+  const avatarEl = document.getElementById('seniorModalAvatar');
+  avatarEl.innerHTML = senior.avatarUrl
+    ? `<img src="${escHtml(senior.avatarUrl)}" alt="รูป${escHtml(senior.name)}" loading="lazy">`
+    : escHtml(senior.initials);
+
+  document.getElementById('seniorModalName').textContent = senior.name;
+  document.getElementById('seniorModalGrade').textContent = senior.grade;
+  document.getElementById('seniorModalMotto').textContent = senior.motto;
+
+  // สร้างรายการติดต่อ
+  const contactsHtml = senior.contacts.map(c => {
+    const isLink = /^https?:\/\//.test(c.value);
+    const valueHtml = isLink
+      ? `<a href="${escHtml(c.value)}" target="_blank" rel="noopener noreferrer">${escHtml(c.value)}</a>`
+      : escHtml(c.value);
+    return `
+      <li class="contact-item">
+        <span class="contact-icon" aria-hidden="true">${c.icon}</span>
+        <span class="contact-label">${escHtml(c.label)}</span>
+        <span class="contact-value">${valueHtml}</span>
+      </li>`;
+  }).join('');
+
+  document.getElementById('seniorModalContacts').innerHTML = contactsHtml;
+  document.getElementById('seniorModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+
+/* ============================================================
+   ฟังก์ชัน: ปิด Modal พี่รหัส
+   ============================================================ */
+function closeSeniorModal(event, force = false) {
+  if (force || (event && event.target === document.getElementById('seniorModal'))) {
+    document.getElementById('seniorModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+
+/* ============================================================
+   ฟังก์ชัน: เปิด/ปิด Drawer Menu
+   ============================================================ */
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+
+/* ============================================================
+   ฟังก์ชัน: เปลี่ยนหน้า (Navigation)
+   ============================================================ */
+function navigateTo(page) {
+  currentPage = page;
+  closeDrawer();
+
+  const homePage   = document.getElementById('homePage');
+  const seniorPage = document.getElementById('seniorPage');
+  const menuHome   = document.getElementById('menuHome');
+  const menuSenior = document.getElementById('menuSenior');
+
+  if (page === 'home') {
+    homePage.classList.remove('hidden');
+    seniorPage.classList.add('hidden');
+    menuHome.classList.add('active');
+    menuSenior.classList.remove('active');
+  } else if (page === 'senior') {
+    homePage.classList.add('hidden');
+    seniorPage.classList.remove('hidden');
+    menuHome.classList.remove('active');
+    menuSenior.classList.add('active');
+    // Scroll ไปด้านบน
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+
+/* ============================================================
+   ฟังก์ชัน Utility: ป้องกัน XSS (HTML Escape)
+   ============================================================ */
+function escHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+
+/* ============================================================
+   ปิด Modal ด้วยปุ่ม Escape
+   ============================================================ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeHintModal(null, true);
+    closeSeniorModal(null, true);
+    closeDrawer();
+  }
+});
+
+
+/* ===== เริ่มต้นแอป ===== */
+init();
+
+</script>
 </body>
 </html>
